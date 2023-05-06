@@ -1,0 +1,251 @@
+DOCKER:
+
+What is docker?
+
+
+Docker installation commands:
+
+OS:Centos
+
+1.ls
+2.sudo yum install -y yum-utils \
+    device-mapper-persistant-data \
+    lvm2
+3.sudo yum-config-manager \
+     ..add-repo \
+     https://download.docker.com/linux/centos/docker-ce.repo
+4.sudo yum install docker-ce
+5.sudo systemctl start docker
+6.sudo systemctl status docker
+
+
+OS:Linux
+
+1.sudo yum update -y
+2.sudo amazon-linux-extras install docker
+3.sudo service docker start
+4.sudo systemctl enable docker
+5.sudo usermod -a -G docker ec2-user
+6.docker info
+7.sudo docker run hello-world
+
+OS:Ubuntu
+
+1.sudo apt-get update
+2.sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+3.apt-cache madison docker-ce
+4.sudo apt-get install docker-ce=<VERSION_STRING> docker-ce-cli=<VERSION_STRING> containerd.io docker-compose-plugin
+5.sudo docker run hello-world
+
+
+
+HOW TO FULL OFFICIAL IMAGES FROM DOCKERHUB:
+
+1.docker pull httpd(imagename)[defaulty it wil pull latest version image]
+2.docker pull httpd:2.4[if you want particular version image]
+3.docker images
+4.docker search httpd[it will go and search image in docker hub from local]
+5.docker run -it -p containerid -d imagename[it->interactive terminal,p->port,d->detached mode]
+6.docker run -d --name giveanynametocontainer imagename:latest[it will create the container,container level port number 80][port 80 exposed within container it will not open outside]
+7.docker ps[check the running container]
+8.docker ps -a[to check running and stooped container both]
+9.docker start containerid[to start the conatiner]
+10.docker stop containerid[to stop the conatiner]
+11.docker stop $(docker ps -aq)
+12.docker rm containerid[to delete the container]
+13.docker rm $(docker ps -q -a)[to delete the stooped container]
+14.docker rmi imageid[to delete the image]
+15.docker rmi $(docker images -q)[to delete all the images at a time]
+16.docker rmi -f imageid
+17.docker exec -it containerid bash[login to container]
+18.docker run -i -t --name centos_server centos:latest[it will pull the image from dockerhub,cretes the container and it will go inside the container]
+
+
+
+
+DOKERFILE:
+
+FROM: to pull the base image 
+RUN:  to execute commands 
+CMD: to provide defaults for an executing container
+ENTRYPOINT: to configure a container that will run as an executable
+WORKDIR: to sets the working directory
+COPY: to copy a directory from your local machine to the docker container
+ADD: to copy files and folders from your local machine to docker container
+EXPOSE: informs docker that the container listens on the specified network ports at runtime
+ENV:to set environmental variables
+
+Requirment:Install tomact on Centos
+
+*Pull centos from dckerhub                            FROM
+*install java                                         RUN
+*Create /opt/tomcat directory                         RUN mkdir
+*change work directory to /opt/tomcat                 WORKDIR
+*Download tomcat packages                             RUN
+*Extract tar.gz file                                  RUN
+*Rename to tomcat diretory                            RUN
+*Tell to docker that it runs on port 8080             EXPOSE
+*start tomcat service                                 CMD
+
+
+AFTER WRITEING DOCKERFILE BUILD IT USING BELOW COMMANDS:
+
+*docker build -t imagename .
+*docker run -it -p 8090:80 -d imagename[create the container and run the container by assiging port]
+
+
+
+HOW TO PUSH IMAGE TO DOCKER HUB
+
+1)docker login
+2)docker commit containerid
+3)docker tag  imageid 8105129514/createdimagename
+4)docker push 8105129514/createdimagename
+
+
+
+DOCKER VOLUME:
+
+
+Volume:directory inside container.
+
+Bind Mount:link to a directory on your computer from within docker.
+
+Why we need docker volume?
+
+1)Data is persistant
+2)Volumes are easier to backup and migrate.
+
+TYPES:
+
+1)anonymous volumes
+2)named volumes
+3)host volumes or bind volumes
+
+
+1)Anonymous volumes
+
+Commands to create anonymous volume
+1)docker run 
+        -v /data01(directory name)[it creates container and directory /data01 under directory /var/lib/docker/volumes/randam-hash/_data]
+
+
+2)Named volumes
+
+Commands to create anonymous volume
+1) docker run 
+         -v indiqube_data01_vol:/data01[it creates container and directory /data01 under directory /var/lib/docker/volumes/indiqube_data01_vol/_data]
+
+
+3)Host volumes or Bind Volumes
+ 
+Commands to create anonymous volume
+1) docker run 
+         -v /opt/data01:/data01[it creates container and directory /data01 and also it will create directory /opt/data01]
+
+
+
+COMMAND TO CREATE ANANOMYOUS VOLUME
+1.docker volume ls
+2.docker run -it --name vtwebuat01 -v /data01 nginx /bin/bash[inside root run this command]
+3.df -h
+4.cd /data01 ,  touch file1 file2
+5.find / -name file1[session2]
+6.docker ps [session2]
+7.docker inspect volumename
+8.exit(session1)
+9.docker rm createdcontainerid
+10.find / -name file1(session2)(still exist the file)
+
+
+
+
+COMMAND TO CREATE NAMED VOLUME
+1.docker volume ls
+2.docker run -it --name vtwebuat02 -v vtwebuat02_data01_val:/data01 nginx /bin/bash
+
+                                  OR
+  docker volume create vtuatweb03_data01_vol
+  docker run -it --name vtuatweb03 -v vtuatweb02_data01_vol:/data01 nginx /bin/bash
+3.df -h
+4.cd /data01 ,  touch file1 file2
+5.find / -name file1[session2]
+6.docker ps [session2]
+7.docker inspect volumename
+8.exit(session1)
+9.docker rm createdcontainerid
+10.find / -name file1(session2)(still exist the file)
+
+
+
+COMMANDS TO CREATE HOST VOLUME OR BIND VOLUME
+1.docker volume ls
+2.cd /opt
+3.mkdir data03
+4.chmod 777 data03
+5.cd /opt/data03
+6.mkdir /opt/data02
+7.docker run -it --name vtwebuat03 -v /opt/data02:/data02 nginx /bin/bash
+8.docker ps -a(session2)
+9.docker volume ls(there is no new volume)(session2)
+10.cd /opt/data03(do ls there is no files)(session2)
+11.cd /opt(session1)
+12.touch file3 file4(session1)
+13.ls(session2)[created files are available]
+
+
+TO DELETE THE DOCKER VOLUME COMMAND IS:
+
+1)docker volume rm $(docker volume ls -q).
+
+
+
+
+HOW TO CREATE DATABASE CONTAINER:
+
+
+1)docker pull mysql:latest
+2)docker images
+3)docker run --name db -d -p3306:3306 -e MYSQL_ROOT_PASSWORD=123 mysql:latest
+4)docker ps
+5)docker exec -it db /bin/bash
+6)mysql -uroot -p123
+7)show databases
+8)exit
+9)exit
+10)docker ps
+11)docker stop db(containername)
+12)docker ps(no ruuning container)
+13)docker build -t suchi/mysql01 .
+14)docker images
+15)docker run -it -p 3306:3306 -d suchi/mysql01
+16)docker exec -it containername /bin/bash
+17)mysql -ugowtami -p1234
+18)show datbases
+19)use users;
+20)select * from users;
+21)select * from users where name='lisa';
+
+
+
+
+DOCKER NETWORK:
+1.docker network
+2.docker network ls
+3.docker network create --subnet 10.1.0.0/16 --gateway 10.1.0.1 --ip-range 10.1.4.0/24 network_1
+4.docker network ls
+5.docker network inspect network_1
+6.docker run -it --name network_container --network network_1 -d ubuntu
+7.docker inspect network_container | grep IP(it will the IP address range of given)(10.1.4.0)
+8.docker run -it --name network_container1 --network network_1 -d ubuntu
+9.docker inspect network_container1 | grep IP(it will the IP address range of given)(10.1.4.1)
+10.docker network rm networkname(stop the containes and delete network)
+
+
+
+
+ Ke9o:X/60^A&Vt#S4#ZcZY+C3.6HG2p1
+
+
+
+

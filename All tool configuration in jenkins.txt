@@ -1,0 +1,329 @@
+
+INSTALLATION STEPS OF JENKINS,MAVEN,GIT,TOMCAT,SONARQUBE,NEXUS.
+
+________________________________________________________________________________________________________________________________________________________________________
+
+                                                               JENKINS
+
+________________________________________________________________________________________________________________________________________________________________________
+
+*Launch an EC2 instane.(t2.small)
+*install jenkins in EC2 instance,by using below commands
+1. sudo yum update –y
+2.sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+3.sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+4.sudo yum upgrade
+5.sudo amazon-linux-extras install java-openjdk11 -y
+6.sudo yum install jenkins -y
+7.sudo systemctl enable jenkins
+8.sudo systemctl start jenkins
+9.sudo systemctl status jenkins
+*Check jenkins version (jenkins --version)
+
+______________________________________________________________________________________________________________________________________________________________________
+
+                                                                   GIT
+
+_______________________________________________________________________________________________________________________________________________________________________
+
+*install git by using below commands
+1.sudo yum update -y
+2.sudo yum install git -y
+3.git version
+
+________________________________________________________________________________________________________________________________________________________________________
+
+
+                                                                    MAVEN
+
+_____________________________________________________________________________________________________________________________________________________________________
+
+*install maven by using below commands
+1.sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+2.sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+3.sudo yum install -y apache-maven
+4.mvn –version
+
+PATH SET OF JDK,GIT,MAVEN 
+1.run command mvn -v it will show the maven path copy and paste it in jenkins global tool configuration.
+2.For git just write git.
+3.For jdk we need to set JAVA_HOME path for that
+ *go to instance first check where jdk installed by typing command like [ file $(which java) ] 
+ *after that it will give symbolic directory that is '/etc/alternatives/java '
+ *after that type file  [ /etc/alternatives/java ] it will shows the path where jdk installed
+ *then type ls -la->it will shows the .bash_profile
+ *then open that .bash_profile by running command like sudo nano .bash_profile
+
+     #User specific environment and startup programs
+
+     PATH=$PATH:$HOME/.local/bin:$HOME/bin
+
+     #java env variable
+   
+     JAVA_HOME="copy and paste the path where jdk installed"
+
+     PATH=$JAVA_HOME/bin:$PATH
+     export path
+
+*ctlr S and ctrl X
+4.afterwards run command sudo .bash_profile
+5.check the java home path by running command like echo $JAVA_HOME (it will shows the java home path )
+6.to check the path run command like echo $PATH(it will shows the path copy and paste it in jenkins global tool configuration as java path)
+
+
+
+____________________________________________________________________________________________________________________________________________________________________________________________________
+
+                                                                         TOMCAT
+
+_____________________________________________________________________________________________________________________________________________________________________________________________________
+
+Installation steps of tomcat:
+
+
+STEP1:
+Launch an instance of linux(t2.micro).(Security group:8080(if it is in different server)
+
+STEP2:
+EC2 instance with Java 11.
+1.amazon-linux-extras install openjdk11 -y
+
+STEP3:
+Go to official website of tomcat(i,e apache tomcat)(download->select latest version->copy the tar.gz link)
+
+STEP4:
+Download the tomcat in server by using below command
+1.wget paste the link
+2.ls
+3.tar -xvzf tomcat_file_name(unzip and untar in sigle step)
+4.ls
+5.mv tomcat_file_name tomact(for better naming convention just name tomcatfilename into only tomcat)
+6.ls
+7.cd tomcat(go inside tomcat we are able to find conf file and bin file)
+8.cd bin
+9../startup.sh(open in web server IP:8080)
+10.cd ..
+11.cd webapps
+12.cd manager
+13.cd META_INF
+14.vi context.xml(comment the line which starts with valve)
+14.cd ..
+15.cd ..
+16.cd host-manager
+17.cd META-INF
+18.vi context.xml(comment the line which starts with valve)
+19.cd ..
+20.cd ..
+21.cd ..
+22.cd conf
+23.vi tomcat-user.xml(go to end add the roles)
+   
+  <role rolename="manager-script"/>
+  <role rolename="manager-gui"/>
+  <role rolename="manager-jmx"/>
+  <role rolename="manager-status"/>
+  <role rolename="admin-gui"/>
+  <user username="tomcat" password="tomcat" roles="manager-script,admin-gui,manager-gui,manager-jmx,manager-status"/
+
+STEP5:
+Go to web and open the tomcat application with Server IP:8080
+USERNAME:tomcat
+PASSWORD:tomcat
+
+
+______________________________________________________________________________________________________________________________________________________________________________________________________
+
+                                                                          SONARQUBE
+
+______________________________________________________________________________________________________________________________________________________________________________________________________
+
+ SONARQUBE WITH DATABASE INSTALLATION STEPS:
+
+1.LAUNCH AN INSTANCE OF UBUNTU WITH T2.SMALL
+2.apt-get update   
+3.apt  list | grep openjdk-11  
+4.apt-get install openjdk-11-jdk -y   
+
+5.sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'  
+6.wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+7.sudo apt-get update
+8.sudo apt-get -y install postgresql
+9.systemctl status postgresql 
+10.cat /etc/passwd
+11.passwd postgres
+12.new password:Meenakshi@123   Retype Password:Meenakshi@123
+13.su - postgres
+14.createuser sonar
+15.psql
+16.ALTER USER sonar WITH ENCRYPTED PASSWORD 'admin';
+17.CREATE DATABASE sonarqube OWNER sonar;
+18.GRANT ALL PRIVILEGES ON DATABASE sonarqube to sonar;
+19./q
+20.exit(become root user)
+21.systemctl restart postgresql
+22.systemctl status postgresql
+23.netstat -tulpin
+24.apt install net-tools OR  netstat -anpt | grep LISTEN
+25.vi /etc/sysctl.conf
+26.insert->vm.max_map_count=524288
+fs.file-max=131072
+ulimit -n 131072
+ulimit -u 8192
+27.vi /etc/security/limits.conf
+28.insert -> sonarqube   -   nofile   131072
+             sonarqube   -   nproc    8192
+29.init 6
+30. wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-8.9.8.54436.zip
+31.apt install unzip
+32.unzip sonarqube-8.9.8.54436.zip
+33.cd sonarqube-8.9.8.54436
+34.ll
+35.cd conf/
+36.ll
+37.vi sonar.properties
+38.do three changes
+
+#sonar.jdbc.username=sonar
+#sonar.jdbc.password=admin
+#sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube
+#sonar.search.javaOpts=-Xmx512m -Xms512m -XX:MaxDirectMemorySize=256m -XX:+HeapDumpOnOutOfMemoryError
+
+39.cat >> /etc/systemd/system/sonarqube.service <<EOL
+[Unit]
+Description=SonarQube service
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User=sonar
+Group=sonar
+PermissionsStartOnly=true
+ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start 
+ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
+StandardOutput=syslog
+LimitNOFILE=65536
+LimitNPROC=4096
+TimeoutStartSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+
+40.cd /etc/systemd/system/sonarqube.service
+41.cd ..
+42.ll
+43.cd /bin
+44.cd /linux-x86-64
+45.cd /opt
+45.mv sonarqube-8.9.8.5433/ sonarqube
+46.useradd -d /opt/sonarqube sonar
+47.ls -l /opt/sonarqube
+48.chown -R sonar:sonar /opt/sonarqube
+49.ls -l /opt/sonarqube
+50.systemctl daemon-reload
+51.systemctl start sonarqube.service (open inweb with public ip:9000)
+
+   
+
+https://github.com/ravdy/DevOps/blob/master/sonarqube/       ------------------------------------------->valaxy technology github link.
+
+
+_____________________________________________________________________________________________________________________________________________________________________________________________________
+
+                                                                                  NEXUS
+
+______________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+INSTALLATION STEPS OF NEXUS:
+
+STEP 1 : Sign into AWS console ----> Launch an instance(Linux) ----> Review and Launch.
+
+STEP 2 : In security group ----> 8081 ----> save rule.
+
+STEP 3 : In command-line-interface,,,,,
+> sudo su -
+> cd /opt
+> sudo yum install java-1.8.0-amazon-corretto
+> wget https://sonatype-download.global.ssl.fastly.net/nexus/3/nexus-3.0.2-02-unix.tar.gz
+> tar -zxvf  nexus-3.0.2-02-unix.tar.gz
+> mv /opt/nexus-3.0.2-02 /opt/nexus
+> sudo adduser nexus
+> visudo 
+---------> Add this line under root
+nexus   ALL=(ALL)       NOPASSWD: ALL
+
+> sudo chown -R nexus:nexus /opt/nexus
+> vi /opt/nexus/bin/nexus.rc
+---------> add "nexus"
+run_as_user="nexus" 
+
+
+> sudo ln -s /opt/nexus/bin/nexus /etc/init.d/nexus
+> su - nexus
+> service nexus start
+
+-----> web page IP address:8081
+
+-------> Default credentials :
+> Username : admin
+> Password : admin@123
+
+
+____________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+                                         INTEGRATION OF GIT, MAVEN ,SONARQUBE, NEXUS,TOMCAT IN JENKINS
+
+_____________________________________________________________________________________________________________________________________________________________________________________________________
+
+
+INTEGRATION STEPS GIT,MAVEN,SONARQUBE,NEXUS,TOMCAT IN JENKINS:
+
+
+1.New item(Select either freestyle or maven job)
+
+2.Under Source code Management section select git and paste the repository url from github.
+
+3.Under Build section->select Invoke top-level maven targets->select maven version as maven->goals(clean install).
+
+4.Again in build section->select Execute sonarqube scanner->write analysis properties
+              sonar.projectKey=Githubusername
+              sonar.projectName=Repositoryname
+              sonar.projectVersion=1.0
+              sonar.sources=src
+              sonar.java.binaries=target
+              sonar.jacoco.reportPath=target\\coverage-reports\\jacoco-unit.exec
+5.Under build section->select Nexus artifact uploader
+    Nexux Details :
+a) Nexus version : NEXUS3
+b) Protocol : HTTP
+c) Nexus Url : "enter IP address:8081"
+d) credentials : 
+> username : admin
+> password : admin@123
+e) GroupID : Enter pom.xml groupid
+f) Version : Enter pom.xml version
+g) Repository : maven-snapshots
+h) Artifacts : maven-project
+i) Type : war
+j) File : webapp/target/webapp.war
+
+6.Under post build actions->select deploy war/ear to a container
+a)WAR/EAR files:**/*.war
+b)Context path:give any name(this name will appear in tomcat whenever you are seeing deployment in tomcat)
+c)Container->Add container->Tomcat 8.x Remote credentials->selcet tomcat credentials
+d)Tomcat URL:Tomcat server IP:8090
+
+Then apply nad svae the job.
+
+
+
+
+
+https://www.hostinger.in/tutorials/how-to-install-jenkins-on-ubuntu/(installation steps of jenkins in ubuntu server)
+
+https://www.digitalocean.com/community/tutorials/install-maven-linux-ubuntu(maven installation setting maven path manually in ubuntu server)
